@@ -1,8 +1,8 @@
 import static java.lang.Character.toUpperCase;
 
 public class Board {
-	private Grid[][] board;
-	private int size;
+	private final Grid[][] board;
+	private final int size;
 
 	public Board() {
 		board = new Grid[1][1];
@@ -58,18 +58,18 @@ public class Board {
 		char player = toUpperCase(board[boardX][boardY].getPlayer(gridX, gridY));
 
 		switch (iteration) {
-			case "col" :
+			case "col" -> {
 				for (int i = 0; i < 3; i++) if (board[i][boardY].getWinner() == player) sum++;
-				break;
-			case "row" :
+			}
+			case "row" -> {
 				for (int i = 0; i < 3; i++) if (board[boardX][i].getWinner() == player) sum++;
-				break;
-			case "diag1" :
+			}
+			case "diag1" -> {
 				for (int i = 0; i < 3; i++) if (board[i][i].getWinner() == player) sum++;
-				break;
-			case "diag2" :
-				for (int i = 0; i < 3; i++) if (board[i][2-i].getWinner() == player) sum++;
-				break;
+			}
+			case "diag2" -> {
+				for (int i = 0; i < 3; i++) if (board[i][2 - i].getWinner() == player) sum++;
+			}
 		}
 		return sum;
 	}
@@ -78,10 +78,8 @@ public class Board {
 		if (!isOnDiagonal(row, col)) return false;
 		int boardX = (row/3), boardY = col/3;
 
-		if (boardX == boardY && iterateGrid(row, col, "diag1") == 3) return true;
-		else if (boardX + boardY == 2 && iterateGrid(row, col, "diag2") == 3) return true;
-
-		return false;
+		return (boardX == boardY && iterateGrid(row, col, "diag1") == 3) ||
+				(boardX + boardY == 2 && iterateGrid(row, col, "diag2") == 3);
 	}
 
 	private boolean wonColumn(int row, int col) { return (iterateGrid(row, col, "col") == 3); }
@@ -98,7 +96,7 @@ public class Board {
 	public boolean canPlay(int row, int col) {
 		int boardX = (row/3), boardY = col/3;
 		int gridX = row-3*boardX, gridY = col-3*boardY;
-		return board[boardX][boardY].canPlay(gridX, gridY) && !board[boardX][boardY].isLocked();
+		return board[boardX][boardY].canPlay(gridX, gridY) && board[boardX][boardY].isUnlocked();
 	}
 
 	public void showBoard() {
@@ -106,9 +104,9 @@ public class Board {
 		for (int row = 0; row < size; row++) {
 			System.out.println(line);
 			for (int i = 0; i < 3; i++) {
-				String rowStr = "| ";
+				StringBuilder rowStr = new StringBuilder("| ");
 				for (int col = 0; col < size; col++) {
-					rowStr += board[row][col].getRow(i) + "| ";
+					rowStr.append(board[row][col].getRow(i)).append("| ");
 				}
 				System.out.println(rowStr);
 			}
