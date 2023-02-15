@@ -1,22 +1,21 @@
 import static java.lang.Character.toUpperCase;
 
 public class Board {
-	private char[][] board;
-	private Grid[][] gloup;
+	private Grid[][] board;
 	private int size;
 
 	public Board() {
-		board = new char[9][9];
-		for (int i = 0; i < 9; i++) {
-			for (int j = 0; j < 9; j++) board[i][j] = '0';
+		board = new Grid[1][1];
+		for (int i = 0; i < 1; i++) {
+			for (int j = 0; j < 1; j++) board[i][j] = new Grid();
 		}
-		size = 1;
+		this.size = 1;
 	}
 
 	public Board(int size) {
-		gloup = new Grid[size][size];
+		board = new Grid[size][size];
 		for (int i = 0; i < size; i++) {
-			for (int j = 0; j < size; j++) gloup[i][j] = new Grid();
+			for (int j = 0; j < size; j++) board[i][j] = new Grid();
 		}
 		this.size = size;
 	}
@@ -24,26 +23,24 @@ public class Board {
 	public int referee(int row, int col) {
 		int boardX = (row/3), boardY = col/3;
 		int gridX = row-3*boardX, gridY = col-3*boardY;
-		Grid currentGrid = gloup[boardX][boardY];
+		Grid currentGrid = board[boardX][boardY];
 		char player = currentGrid.getPlayer(gridX, gridY);
 		if (currentGrid.getPlayer(gridX, gridY) == '.') return 0;
 
 		if (size == 1) {
 			if (currentGrid.wonGrid(gridX, gridY)) {
 				if (player == 'x') return 1;
-				else if (player == 'o') return -1;
+				else return -1;
 			}
 			else return currentGrid.isFull() ? -2 : 0;
 		}
-		else if (size == 3) {
+		else  {
 			if (currentGrid.wonGrid(gridX, gridY) && wonBoard(row, col)) {
 				if (player == 'x') return 1;
-				else if (player == 'o') return -1;
+				else return -1;
 			}
 			else return isFull()? -2 : 0;
 		}
-
-		return 5;
 	}
 
 
@@ -54,56 +51,54 @@ public class Board {
 		return ((boardX == boardY) || (boardX + boardY == 2));
 	}
 
+	private int iterateGrid(int row, int col, String iteration) {
+		int sum = 0;
+		int boardX = (row/3), boardY = col/3;
+		int gridX = row-3*boardX, gridY = col-3*boardY;
+		char player = toUpperCase(board[boardX][boardY].getPlayer(gridX, gridY));
+
+		switch (iteration) {
+			case "col" :
+				for (int i = 0; i < 3; i++) if (board[i][boardY].getWinner() == player) sum++;
+				break;
+			case "row" :
+				for (int i = 0; i < 3; i++) if (board[boardX][i].getWinner() == player) sum++;
+				break;
+			case "diag1" :
+				for (int i = 0; i < 3; i++) if (board[i][i].getWinner() == player) sum++;
+				break;
+			case "diag2" :
+				for (int i = 0; i < 3; i++) if (board[i][2-i].getWinner() == player) sum++;
+				break;
+		}
+		return sum;
+	}
+
 	private boolean wonDiagonal(int row, int col) {
 		if (!isOnDiagonal(row, col)) return false;
 		int boardX = (row/3), boardY = col/3;
-		int gridX = row-3*boardX, gridY = col-3*boardY;
-		char player = toUpperCase(gloup[boardX][boardY].getPlayer(gridX, gridY));
 
-		if (boardX == boardY) {
-			int sum = 0;
-			for (int i = 0; i < 3; i++) if (gloup[i][i].getWinner() == player) sum++;
-			if (sum == 3) return true;
-		}
-		else if (boardX + boardY == 2) {
-			int sum = 0;
-			for (int i = 0; i < 3; i++) if (gloup[i][2-i].getWinner() == player) sum++;
-			if (sum == 3) return true;
-		}
+		if (boardX == boardY && iterateGrid(row, col, "diag1") == 3) return true;
+		else if (boardX + boardY == 2 && iterateGrid(row, col, "diag2") == 3) return true;
 
 		return false;
 	}
 
-	private boolean wonColumn(int row, int col) {
-		int sum = 0;
-		int boardX = (row/3), boardY = col/3;
-		int gridX = row-3*boardX, gridY = col-3*boardY;
-		char player = toUpperCase(gloup[boardX][boardY].getPlayer(gridX, gridY));
-		for (int i = 0; i < 3; i++) if (gloup[i][boardY].getWinner() == player) sum++;
+	private boolean wonColumn(int row, int col) { return (iterateGrid(row, col, "col") == 3); }
 
-		return (sum == 3);
-	}
-
-	private boolean wonRow(int row, int col) {
-		int sum = 0;
-		int boardX = (row/3), boardY = col/3;
-		int gridX = row-3*boardX, gridY = col-3*boardY;
-		char player = toUpperCase(gloup[boardX][boardY].getPlayer(gridX, gridY));
-		for (int i = 0; i < 3; i++) if (gloup[boardX][i].getWinner() == player) sum++;
-
-		return (sum == 3);
+	private boolean wonRow(int row, int col) { return (iterateGrid(row, col, "row") == 3) ;
 	}
 
 	public void play(int row, int col, char player) {
 		int boardX = (row/3), boardY = col/3;
 		int gridX = row-3*boardX, gridY = col-3*boardY;
-		if (canPlay(row, col)) gloup[boardX][boardY].play(gridX, gridY, player);
+		if (canPlay(row, col)) board[boardX][boardY].play(gridX, gridY, player);
 	}
 
 	public boolean canPlay(int row, int col) {
 		int boardX = (row/3), boardY = col/3;
 		int gridX = row-3*boardX, gridY = col-3*boardY;
-		return gloup[boardX][boardY].canPlay(gridX, gridY) && !gloup[boardX][boardY].isLocked();
+		return board[boardX][boardY].canPlay(gridX, gridY) && !board[boardX][boardY].isLocked();
 	}
 
 	public void showBoard() {
@@ -113,7 +108,7 @@ public class Board {
 			for (int i = 0; i < 3; i++) {
 				String rowStr = "| ";
 				for (int col = 0; col < size; col++) {
-					rowStr += gloup[row][col].getRow(i) + "| ";
+					rowStr += board[row][col].getRow(i) + "| ";
 				}
 				System.out.println(rowStr);
 			}
@@ -123,7 +118,7 @@ public class Board {
 
 	private boolean isFull() {
 		for (int i = 0; i < size; i++) {
-			for (int j = 0; j < size; j++) if (!gloup[i][j].isFull()) return false;
+			for (int j = 0; j < size; j++) if (!board[i][j].isFull()) return false;
 		}
 		return true;
 	}
