@@ -2,9 +2,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+//TODO : exceptions, working on any size, AI
+
 public class TicTacToe {
 
-	private static void play(Board game) throws IOException {
+	private static void playConsole(Board game) throws IOException {
 		System.out.println("Start of game");
 		char player = 'x';
 		int x = 0, y = 0;
@@ -13,7 +15,6 @@ public class TicTacToe {
 
 		while (ref == 0) {
 			game.showBoard();
-
 			boolean correctInput = false;
 			while (!correctInput) {
 				System.out.println("Input as 'x y' (player " + player + ") : ");
@@ -26,7 +27,6 @@ public class TicTacToe {
 				}
 			}
 
-			//error if x, y < 0 | x,y > size*size-1
 			game.play(x, y, player);
 			player = (player == 'x')? 'o' : 'x';
 			ref = game.referee(x, y);
@@ -43,7 +43,7 @@ public class TicTacToe {
 	public static void main(String[] args) {
 		Board game = new Board(3);
 		try {
-			play(game);
+			playConsole(game);
 		}
 		catch (IOException e) {
 			System.out.println("error IO");
